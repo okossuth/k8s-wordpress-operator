@@ -10,7 +10,7 @@ the domain to route53, enabling the site on the k8s ingress and creating the SSL
 
 Updates to existing sites are also supported like expanding PVCs size, changing number of replicas, limits, etc.
 
-It assumes that the kubernetes cluster has the [percona operator](https://www.percona.com/doc/kubernetes-operator-for-pxc) installed in order to create the database.
+It assumes that the kubernetes cluster has the [percona operator](https://www.percona.com/doc/kubernetes-operator-for-pxc) installed in order to create the database. Also it is assumed [rook](https://rook.io) version 1.4 is being used as storage solution for Kubernetes.
 
 ### How to install the Wordpress operator? ###
 ```
