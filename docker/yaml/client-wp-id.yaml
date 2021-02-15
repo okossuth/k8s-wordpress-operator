@@ -1,0 +1,62 @@
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{name}"
+  labels:
+    app: "{name}"
+spec:
+  selector:
+    matchLabels:
+      app: "{name}"
+  serviceName: "{name}"
+  replicas: {replicas}
+  template:
+    metadata:
+      labels:
+        app: "{name}"
+    spec:
+      nodeSelector:
+        doks.digitalocean.com/node-pool: "{nodepool}"
+      containers:
+      - image: "{image}"
+        name: "{name}"
+        resources:
+          limits:
+            cpu: "{cpulimit}"
+            memory: "{memlimit}"
+          requests:
+            cpu: 100m
+            memory: 128Mi
+
+        securityContext:
+          privileged: true
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: {name}-pxc.pxc.svc.cluster.local
+        - name: WORDPRESS_DB_PASSWORD
+          value: mysqlr00t
+        - name: WORDPRESS_DB_NAME
+          value: "{name}"
+        ports:
+        - containerPort: 80
+          name: "{name}"
+        volumeMounts:
+        - name: datadir
+          mountPath: /var/www/html
+      volumes:
+      - name: datadir
+        persistentVolumeClaim:
+          claimName: {name}-pvc
+  #volumeClaimTemplates:
+  #- metadata:
+  #    name: datadir
+  #    labels:
+  #      app: "{name}"
+  #  spec:
+  #    accessModes: [ "{accessmode}" ]
+  #    storageClassName: "{storageclass}"
+  #    resources:
+  #      requests:
+  #        storage: "{pvcsize}"
+ 

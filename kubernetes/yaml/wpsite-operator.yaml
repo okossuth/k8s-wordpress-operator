@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wpsite-operator
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: wpsite-operator
+  template:
+    metadata:
+      labels:
+        app: wpsite-operator
+    spec:
+      serviceAccountName: wpsite-operator
+      containers:
+      - image: registry.digitalocean.com/incsub/wpsite-operator:latest
+        imagePullPolicy: Always
+        name: wpsite-operator
+        envFrom:
+        - secretRef:
+            name: aws-secret
+      imagePullSecrets:
+      - name: registry-incsub

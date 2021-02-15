@@ -1,0 +1,86 @@
+# CRD to deploy a wordpress sites from a git repo
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: wpsites.incsub.com
+spec:
+  scope: Namespaced
+  group: incsub.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+  names:
+    kind: WpSite
+    plural: wpsites
+    singular: wpsite
+    shortNames:
+      - wpsite
+  additionalPrinterColumns:
+    - name: Replicas
+      type: string
+      priority: 0
+      JSONPath: .spec.replicas
+      description: Amount of replicas
+
+    - name: SiteId
+      type: string
+      priority: 0
+      JSONPath: .spec.siteid
+      description: SiteId of site
+
+    - name: Domain
+      type: string
+      priority: 0
+      JSONPath: .spec.domain
+      description: Domain to use for site
+
+    - name: CpuLimit
+      type: string
+      priority: 0
+      JSONPath: .spec.cpulimit
+      description: Cpu limit to use for site
+
+    - name: MemoryLimit
+      type: string
+      priority: 0
+      JSONPath: .spec.memlimit
+      description: Memory limit to use for site
+
+    - name: PVCSize
+      type: string
+      priority: 0
+      JSONPath: .spec.pvcsize
+      description: PVC size to use for site
+
+    - name: StorageClass
+      type: string
+      priority: 0
+      JSONPath: .spec.storageclass
+      description: Storage class name to use for site
+
+    - name: AccessMode
+      type: string
+      priority: 0
+      JSONPath: .spec.accessmode
+      description: Access mode for PVC to use for site
+
+    - name: Image
+      type: string
+      priority: 0
+      JSONPath: .spec.image
+      description: Docker image to use for site
+
+    - name: NodePool
+      type: string
+      priority: 0
+      JSONPath: .spec.nodepool
+      description: Node pool to use for site
+
+    - name: S3Bucket
+      type: string
+      priority: 0
+      JSONPath: .spec.s3bucket
+      description: S3 bucket to use for site
+    
+

@@ -1,0 +1,119 @@
+apiVersion: pxc.percona.com/v1-5-0
+kind: PerconaXtraDBCluster
+metadata:
+  name: client-wp-5
+  namespace: pxc
+  finalizers:
+    - delete-pxc-pods-in-order
+spec:
+  secretsName: my-cluster-secrets
+  vaultSecretName: keyring-secret-vault
+  sslSecretName: my-cluster-ssl
+  sslInternalSecretName: my-cluster-ssl-internal
+  #allowUnsafeConfigurations: false
+  allowUnsafeConfigurations: true
+  updateStrategy: SmartUpdate
+  upgradeOptions:
+    versionServiceEndpoint: https://check.percona.com/versions
+    apply: Never
+    schedule: "0 4 * * *"
+  pxc:
+    nodeSelector:
+      doks.digitalocean.com/node-pool: wordpress-pool
+    size: 1 
+    image: percona/percona-xtradb-cluster:8.0.19-10.1
+    resources:
+      requests:
+        memory: 500M
+        cpu: 600m
+    affinity:
+      antiAffinityTopologyKey: "kubernetes.io/hostname"
+    podDisruptionBudget:
+      maxUnavailable: 1
+#      minAvailable: 0
+    volumeSpec:
+      persistentVolumeClaim:
+        storageClassName: rook-ceph-block
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi
+    gracePeriod: 600
+  haproxy:
+    nodeSelector:
+      doks.digitalocean.com/node-pool: wordpress-pool
+    enabled: true
+    size: 1
+    image: percona/percona-xtradb-cluster-operator:1.5.0-haproxy
+    resources:
+      requests:
+        memory: 250M
+        cpu: 600m
+    affinity:
+      antiAffinityTopologyKey: "kubernetes.io/hostname"
+    podDisruptionBudget:
+      maxUnavailable: 1
+#      minAvailable: 0
+    gracePeriod: 30
+
+  proxysql:
+    enabled: false
+    size: 3
+    image: percona/percona-xtradb-cluster-operator:1.5.0-proxysql
+    resources:
+      requests:
+        memory: 1G
+        cpu: 600m
+    affinity:
+      antiAffinityTopologyKey: "kubernetes.io/hostname"
+    volumeSpec:
+      persistentVolumeClaim:
+        storageClassName: rook-ceph-block
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 2Gi
+    podDisruptionBudget:
+      maxUnavailable: 1
+#      minAvailable: 0
+    gracePeriod: 30
+
+  pmm:
+    enabled: false
+    image: percona/percona-xtradb-cluster-operator:1.5.0-pmm
+    serverHost: monitoring-service
+    serverUser: pmm
+  
+  backup:
+    enabled: false
+    nodeSelector:
+      doks.digitalocean.com/node-pool: wordpress-pool
+    image: percona/percona-xtradb-cluster-operator:1.5.0-pxc8.0-backup
+    serviceAccountName: percona-xtradb-cluster-operator
+    storages:
+      s3-us-east:
+        type: s3
+        s3:
+          bucket: k8s-xtrabackups
+          credentialsSecret: my-cluster-name-backup-s3
+          region: us-east-1
+      fs-pvc:
+        type: filesystem
+        volume:
+          persistentVolumeClaim:
+            storageClassName: rook-ceph-block
+            accessModes: [ "ReadWriteOnce" ]
+            resources:
+              requests:
+                storage: 5Gi
+#    schedule:
+#      - name: "sat-night-backup"
+#        schedule: "0 0 * * 6"
+#        keep: 3
+#        storageName: s3-us-east
+#      - name: "daily-backup"
+#        schedule: "0 0 * * *"
+#        failedJobsHistoryLimit: 0
+#        keep: 5
+#        storageName: fs-pvc
+

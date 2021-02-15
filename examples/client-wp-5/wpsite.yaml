@@ -1,0 +1,17 @@
+apiVersion: incsub.com/v1
+kind: WpSite
+metadata:
+  name: client-wp-5
+spec:
+  replicas: 1
+  siteid: "5"
+  domain: "k8s-client-wp-5.wpmudev.host"
+  cpulimit: "194m"
+  memlimit: "128Mi"
+  pvcsize:  "25Gi"
+  storageclass: "rook-ceph-block"
+  accessmode: "ReadWriteOnce"
+  image: "wordpress:5.5-php7.4"
+  nodepool: "wordpress-pool"
+  s3bucket: "wpsite"
+
